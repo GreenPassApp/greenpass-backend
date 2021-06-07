@@ -22,8 +22,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.springdoc:springdoc-openapi-ui:1.3.1")
-    implementation("org.modelmapper:modelmapper:2.3.0")
+    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("com.auth0:java-jwt:3.16.0")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
