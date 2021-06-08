@@ -1,12 +1,12 @@
 package eu.greenpassapp.greenpassbackend.logic.impl
 
+import eu.greenpassapp.greenpassbackend.beans.dgc.DigitalGreenCertificate
 import eu.greenpassapp.greenpassbackend.beans.jwt.JWTHelper
 import eu.greenpassapp.greenpassbackend.dao.UserRepository
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
 import eu.greenpassapp.greenpassbackend.model.User
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
@@ -17,10 +17,11 @@ import java.time.LocalDate
 class UserLogicImpl(
     private val userRepository: UserRepository,
     private val jwtHelper: JWTHelper,
+    private val digitalGreenCertificate: DigitalGreenCertificate
 ) : UserLogic {
     override fun insert(certificate: String): Pair<User, String> {
-        //TODO CHECK certificate
-        val user = User("Jakob", "Stadlhuber", LocalDate.now(), "testType")
+        val parsedCert = digitalGreenCertificate.validate(certificate)
+        val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob), "testType")
 
         val newUser = userRepository.saveAndFlush(user)
         val token = jwtHelper.getToken(newUser.link!!)
@@ -28,8 +29,8 @@ class UserLogicImpl(
     }
 
     override fun update(certificate: String, token: String) {
-        //TODO CHECK certificate
-        val user = User("Jakob2", "Stadlhuber2", LocalDate.now(), "testType")
+        val parsedCert = digitalGreenCertificate.validate(certificate)
+        val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob), "testType")
 
         user.link = jwtHelper.verifyTokenAndGetLink(token)
         userRepository.saveAndFlush(user)

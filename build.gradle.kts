@@ -24,6 +24,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("com.auth0:java-jwt:3.16.0")
+    implementation("se.digg.dgc:dgc-create-validate:1.0.0")
+    implementation("se.digg.dgc:dgc-schema:1.0.0")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
