@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import java.util.*
 
 @Service
 class JWTHelperImpl(
@@ -21,6 +22,7 @@ class JWTHelperImpl(
             val algorithm: Algorithm = Algorithm.HMAC256(secret)
             return JWT.create()
                 .withClaim("link", linkClaim)
+                .withIssuedAt(Date())
                 .sign(algorithm)
         } catch (exception: JWTCreationException) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Couldn't generate Token")
