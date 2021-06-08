@@ -34,4 +34,9 @@ class UserController(
         userLogic.update(certificate.data, token)
         return ResponseEntity<Any>(HttpStatus.NO_CONTENT)
     }
+
+    @GetMapping(value = ["/user/{link}"])
+    fun getUser(@PathVariable link: String): ResponseEntity<User> {
+        return ResponseEntity<User>(userLogic.getUser(link),HttpStatus.OK)
+    }
 }

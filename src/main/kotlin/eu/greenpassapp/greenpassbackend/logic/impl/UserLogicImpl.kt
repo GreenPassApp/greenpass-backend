@@ -4,6 +4,7 @@ import eu.greenpassapp.greenpassbackend.beans.jwt.JWTHelper
 import eu.greenpassapp.greenpassbackend.dao.UserRepository
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
 import eu.greenpassapp.greenpassbackend.model.User
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -32,5 +33,9 @@ class UserLogicImpl(
 
         user.link = jwtHelper.verifyTokenAndGetLink(token)
         userRepository.saveAndFlush(user)
+    }
+
+    override fun getUser(link: String): User{
+        return userRepository.findByIdOrNull(link) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No User found")
     }
 }
