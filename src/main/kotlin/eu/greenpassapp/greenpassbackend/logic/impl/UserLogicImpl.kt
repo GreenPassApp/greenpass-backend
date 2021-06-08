@@ -20,8 +20,7 @@ class UserLogicImpl(
     private val digitalGreenCertificate: DigitalGreenCertificate
 ) : UserLogic {
     override fun insert(certificate: String): Pair<User, String> {
-        val parsedCert = digitalGreenCertificate.validate(certificate)
-        val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob), "testType")
+        val user = getParsedUserFrom(certificate)
 
         val newUser = userRepository.saveAndFlush(user)
         val token = jwtHelper.getToken(newUser.link!!)
@@ -29,8 +28,7 @@ class UserLogicImpl(
     }
 
     override fun update(certificate: String, token: String) {
-        val parsedCert = digitalGreenCertificate.validate(certificate)
-        val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob), "testType")
+        val user = getParsedUserFrom(certificate)
 
         user.link = jwtHelper.verifyTokenAndGetLink(token)
         userRepository.saveAndFlush(user)
@@ -42,5 +40,10 @@ class UserLogicImpl(
 
     override fun delete(token: String) {
         userRepository.delete(getUser(jwtHelper.verifyTokenAndGetLink(token)))
+    }
+
+    private fun getParsedUserFrom(certificate: String): User {
+        val parsedCert = digitalGreenCertificate.validate(certificate)
+        return User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob), "testType")
     }
 }
