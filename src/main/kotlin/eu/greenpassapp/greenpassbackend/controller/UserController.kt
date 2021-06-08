@@ -6,6 +6,7 @@ import com.auth0.jwt.exceptions.JWTCreationException
 import com.auth0.jwt.exceptions.JWTVerificationException
 import eu.greenpassapp.greenpassbackend.beans.jwt.JWTHelper
 import eu.greenpassapp.greenpassbackend.dto.RawCertificateDto
+import eu.greenpassapp.greenpassbackend.dto.UserArtifactsDto
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
 import eu.greenpassapp.greenpassbackend.model.User
 import org.springframework.beans.factory.annotation.Value
@@ -25,16 +26,15 @@ import java.time.LocalDate
 class UserController(
     private val userLogic: UserLogic,
     private val jwtHelper: JWTHelper,
-    @Value("\${jwt.secret}") private val secret: String
 ) {
 
     @PostMapping(value = ["/insert"])
-    fun insert(@RequestBody certificate: RawCertificateDto): ResponseEntity<Pair<String, String>> { //TODO: refactor pair with dto
+    fun insert(@RequestBody certificate: RawCertificateDto): ResponseEntity<UserArtifactsDto> {
         //TODO CHECK certificate
         val user = User("Jakob", "Stadlhuber", LocalDate.now(), "testType") //TODO check if user.link already exists
 
         val newUser = userLogic.insertOrUpdate(user)
-        return ResponseEntity<Pair<String, String>>(Pair(newUser.link, jwtHelper.getToken(newUser.link)), HttpStatus.OK) //insert new user
+        return ResponseEntity<UserArtifactsDto>(UserArtifactsDto(newUser.link, jwtHelper.getToken(newUser.link)), HttpStatus.OK) //insert new user
     }
 
     @PostMapping(value = ["/update"])
