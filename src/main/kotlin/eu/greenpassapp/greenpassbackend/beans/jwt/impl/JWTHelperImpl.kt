@@ -32,10 +32,19 @@ class JWTHelperImpl(
             val algorithm = Algorithm.HMAC256(secret)
             val verifier = JWT.require(algorithm)
                 .build()
-            val jwt = verifier.verify(token) //TODO string split Bearer and check if exist
+            val jwt = verifier.verify(verifyAndExtractBearerSchema(token))
             return jwt.getClaim("link").asString()
         } catch (exception: JWTVerificationException) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Wrong Token")
+        }
+    }
+
+    private fun verifyAndExtractBearerSchema(token: String): String{
+        val parts = token.split(' ');
+        if (parts.count() == 2 && parts[0] == "Bearer") {
+            return parts[1]
+        }else {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Wrong Bearer Schema")
         }
     }
 }
