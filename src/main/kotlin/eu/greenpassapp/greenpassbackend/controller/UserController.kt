@@ -20,13 +20,11 @@ import java.time.LocalDate
 )
 class UserController(
     private val userLogic: UserLogic,
-    private val jwtHelper: JWTHelper,
 ) {
-
     @PostMapping(value = ["/insert"])
     fun insert(@RequestBody certificate: RawCertificateDto): ResponseEntity<UserArtifactsDto> {
         val result = userLogic.insert(certificate.data)
-        return ResponseEntity<UserArtifactsDto>(UserArtifactsDto(result.first.link, result.second), HttpStatus.OK)
+        return ResponseEntity<UserArtifactsDto>(UserArtifactsDto(result.first.link!!, result.second), HttpStatus.OK)
     }
 
     @PostMapping(value = ["/update"])

@@ -19,10 +19,10 @@ class UserLogicImpl(
 ) : UserLogic {
     override fun insert(certificate: String): Pair<User, String> {
         //TODO CHECK certificate
-        val user = User("Jakob", "Stadlhuber", LocalDate.now(), "testType") //TODO check if user.link already exists
+        val user = User("Jakob", "Stadlhuber", LocalDate.now(), "testType")
 
         val newUser = userRepository.saveAndFlush(user)
-        val token = jwtHelper.getToken(newUser.link)
+        val token = jwtHelper.getToken(newUser.link!!)
         return Pair(newUser, token)
     }
 
