@@ -15,7 +15,7 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping(
-    value = ["/api"],
+    value = ["/api/user"],
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
 class UserController(

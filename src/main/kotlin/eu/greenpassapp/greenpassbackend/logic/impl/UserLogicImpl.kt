@@ -40,6 +40,6 @@ class UserLogicImpl(
     }
 
     override fun delete(token: String) {
-        userRepository.deleteById(jwtHelper.verifyTokenAndGetLink(token))
+        userRepository.delete(getUser(jwtHelper.verifyTokenAndGetLink(token)))
     }
 }
