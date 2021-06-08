@@ -15,7 +15,7 @@ import javax.persistence.Id
 @Entity
 data class User(val firstName: String, val lastName: String, val birthday: LocalDate, var type: String){
     @Id
-    @GenericGenerator(name="seq_id",strategy="eu.greenpassapp.greenpassbackend.generator.SecureRandomGenerator")
-    @GeneratedValue(generator="seq_id")
+    @GenericGenerator(name="random_link",strategy="eu.greenpassapp.greenpassbackend.generator.SecureRandomGenerator")
+    @GeneratedValue(generator="random_link")
     var link: String? = null
 }
