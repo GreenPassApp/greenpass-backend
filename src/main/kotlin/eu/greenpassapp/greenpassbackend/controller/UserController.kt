@@ -22,20 +22,28 @@ class UserController(
     private val userLogic: UserLogic,
 ) {
     @PostMapping(value = ["/insert"])
-    fun insert(@RequestBody certificate: RawCertificateDto): ResponseEntity<UserArtifactsDto> {
+    fun insertUser(@RequestBody certificate: RawCertificateDto): ResponseEntity<UserArtifactsDto> {
         val result = userLogic.insert(certificate.data)
         return ResponseEntity<UserArtifactsDto>(UserArtifactsDto(result.first.link!!, result.second), HttpStatus.OK)
     }
 
     @PostMapping(value = ["/update"])
-    fun update(@RequestBody certificate: RawCertificateDto, @RequestHeader headers: Map<String, String>,
+    fun updateUser(@RequestBody certificate: RawCertificateDto, @RequestHeader headers: Map<String, String>,
     ): ResponseEntity<Any> {
         val token = headers["authorization"] ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "No token set")
         userLogic.update(certificate.data, token)
         return ResponseEntity<Any>(HttpStatus.NO_CONTENT)
     }
 
-    @GetMapping(value = ["/user/{link}"])
+    @DeleteMapping(value = ["/delete"])
+    fun deleteUser(@RequestHeader headers: Map<String, String>,
+    ): ResponseEntity<Any> {
+        val token = headers["authorization"] ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "No token set")
+        userLogic.delete(token)
+        return ResponseEntity<Any>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping(value = ["/get/{link}"])
     fun getUser(@PathVariable link: String): ResponseEntity<User> {
         return ResponseEntity<User>(userLogic.getUser(link),HttpStatus.OK)
     }

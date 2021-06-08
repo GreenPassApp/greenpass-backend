@@ -7,4 +7,5 @@ interface UserLogic {
     fun insert(certificate: String): Pair<User, String>
     fun update(certificate: String, token: String)
     fun getUser(link: String): User
+    fun delete(token: String)
 }

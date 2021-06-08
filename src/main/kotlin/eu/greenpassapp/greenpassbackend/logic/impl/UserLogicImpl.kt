@@ -38,4 +38,8 @@ class UserLogicImpl(
     override fun getUser(link: String): User{
         return userRepository.findByIdOrNull(link) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No User found")
     }
+
+    override fun delete(token: String) {
+        userRepository.deleteById(jwtHelper.verifyTokenAndGetLink(token))
+    }
 }
