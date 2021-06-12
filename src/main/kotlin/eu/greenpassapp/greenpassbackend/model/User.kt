@@ -12,12 +12,12 @@ data class User(val firstName: String, val lastName: String, val birthday: Local
     @GeneratedValue(generator="random_link")
     var link: String? = null
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var vaccinated: CovidVaccinate? = null
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var tested: CovidTest? = null
 
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var recovered: CovidRecover? = null
 }
