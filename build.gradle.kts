@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    id("org.owasp.dependencycheck") version "6.2.2"
     id("org.springframework.boot") version "2.5.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     kotlin("jvm") version "1.5.10"
@@ -16,6 +17,7 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -26,6 +28,10 @@ dependencies {
     implementation("com.auth0:java-jwt:3.16.0")
     implementation("se.digg.dgc:dgc-create-validate:1.0.0")
     implementation("se.digg.dgc:dgc-schema:1.0.0")
+    implementation("com.ryantenney.passkit4j:passkit4j:2.0.1")
+    implementation("org.bouncycastle:bcprov-jdk15on:1.69")
+    implementation("org.bouncycastle:bcpkix-jdk15on:1.69")
+    implementation("org.bouncycastle:bcmail-jdk15on:1.69")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

@@ -1,6 +1,5 @@
 package eu.greenpassapp.greenpassbackend.controller
 
-import eu.greenpassapp.greenpassbackend.beans.jwt.JWTHelper
 import eu.greenpassapp.greenpassbackend.dto.RawCertificateDto
 import eu.greenpassapp.greenpassbackend.dto.UserArtifactsDto
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
@@ -10,8 +9,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import java.time.LocalDate
-
 
 @RestController
 @RequestMapping(
@@ -46,5 +43,10 @@ class UserController(
     @GetMapping(value = ["/get/{link}"])
     fun getUser(@PathVariable link: String): ResponseEntity<User> {
         return ResponseEntity<User>(userLogic.getUser(link),HttpStatus.OK)
+    }
+
+    @GetMapping(value = ["/pass"])
+    fun generatePassKit(@RequestBody certificate: RawCertificateDto): ResponseEntity<ByteArray> {
+        return ResponseEntity<ByteArray>(userLogic.generatePressKit(certificate.data), HttpStatus.OK)
     }
 }

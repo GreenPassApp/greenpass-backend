@@ -2,6 +2,7 @@ package eu.greenpassapp.greenpassbackend.logic.impl
 
 import eu.greenpassapp.greenpassbackend.beans.dgc.DigitalGreenCertificate
 import eu.greenpassapp.greenpassbackend.beans.jwt.JWTHelper
+import eu.greenpassapp.greenpassbackend.beans.passkit.PassKit
 import eu.greenpassapp.greenpassbackend.dao.UserRepository
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
 import eu.greenpassapp.greenpassbackend.model.CovidRecover
@@ -24,7 +25,8 @@ import java.time.LocalDate
 class UserLogicImpl(
     private val userRepository: UserRepository,
     private val jwtHelper: JWTHelper,
-    private val digitalGreenCertificate: DigitalGreenCertificate
+    private val digitalGreenCertificate: DigitalGreenCertificate,
+    private val passKit: PassKit
 ) : UserLogic {
     override fun insert(certificate: String): Pair<User, String> {
         val user = getParsedUserFrom(certificate)
@@ -47,6 +49,11 @@ class UserLogicImpl(
 
     override fun delete(token: String) {
         userRepository.delete(getUser(jwtHelper.verifyTokenAndGetLink(token)))
+    }
+
+    override fun generatePressKit(certificate: String): ByteArray {
+        digitalGreenCertificate.validate(certificate) //TODO: probably use getParsedUserFrom and check if valid
+        return passKit.generatePass(certificate)
     }
 
     private fun getParsedUserFrom(certificate: String): User {
