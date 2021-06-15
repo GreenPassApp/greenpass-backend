@@ -38,6 +38,7 @@ class PassKitImpl(
                 )
             )
             .logoText("Boulder Coffee")
+            .labelColor(Color.WHITE)
             .foregroundColor(Color.WHITE)
             .backgroundColor(Color(118, 74, 50))
             .files(
@@ -52,9 +53,8 @@ class PassKitImpl(
             .passInformation(
                 StoreCard()
                     .headerFields(
-                        NumberField("balance", "balance_label", 25)
+                        TextField("balance", "balance_label", "25")
                             .textAlignment(TextAlignment.RIGHT)
-                            .currencyCode("USD")
                     )
                     .auxiliaryFields(
                         TextField("level", "level_label", "level_gold"),
