@@ -28,8 +28,8 @@ class PassKitImpl(
         val pass = Pass()
             .teamIdentifier(teamId)
             .passTypeIdentifier("pass.eu.greenapp.certest")
-            .organizationName("Boulder Coffee Co.")
-            .description("Boulder Coffee Rewards Card")
+            .organizationName("GreenPass App")
+            .description("GreenPass App")
             .serialNumber("p69f2J")
             .barcode(
                 Barcode(
@@ -37,7 +37,7 @@ class PassKitImpl(
                     certificate
                 )
             )
-            .logoText("Boulder Coffee")
+            .logoText("GreenPass")
             .labelColor(Color.WHITE)
             .foregroundColor(Color.WHITE)
             .backgroundColor(Color(118, 74, 50))
