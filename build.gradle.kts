@@ -32,6 +32,7 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk15on:1.69")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.69")
     implementation("org.bouncycastle:bcmail-jdk15on:1.69")
+    implementation("com.beust:klaxon:5.5")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

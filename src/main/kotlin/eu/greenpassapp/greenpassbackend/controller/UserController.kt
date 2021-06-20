@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException
     value = ["/api/user"],
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
+@CrossOrigin
 class UserController(
     private val userLogic: UserLogic,
 ) {
