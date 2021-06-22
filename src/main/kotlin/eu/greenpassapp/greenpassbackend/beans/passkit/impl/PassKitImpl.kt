@@ -63,12 +63,12 @@ class PassKitImpl(
             .foregroundColor(Color.WHITE)
             .backgroundColor(Color(19, 90, 207))
             .files(
-                PassResource("en.lproj/pass.strings", File("src/main/resources/storecard/en.lproj/pass.strings")),
-                PassResource("de.lproj/pass.strings", File("src/main/resources/storecard/de.lproj/pass.strings")),
-                PassResource("src/main/resources/storecard/icon.png"),
-                PassResource("src/main/resources/storecard/icon@2x.png"),
-                PassResource("src/main/resources/storecard/logo.png"),
-                PassResource("src/main/resources/storecard/logo@2x.png"),
+                PassResource("en.lproj/pass.strings", File("src/main/resources/pass/en.lproj/pass.strings")),
+                PassResource("de.lproj/pass.strings", File("src/main/resources/pass/de.lproj/pass.strings")),
+                PassResource("src/main/resources/pass/icon.png"),
+                PassResource("src/main/resources/pass/icon@2x.png"),
+                PassResource("src/main/resources/pass/logo.png"),
+                PassResource("src/main/resources/pass/logo@2x.png"),
             )
             .passInformation(
                 StoreCard()
@@ -77,7 +77,7 @@ class PassKitImpl(
                             .textAlignment(TextAlignment.RIGHT)
                     )
                     .primaryFields(
-                        listOfTextField as List<Field<*>>?
+                        listOfTextField[0]
                     )
                     .auxiliaryFields(
                         TextField("name", "name_label", "${user.firstName} ${user.lastName}"),

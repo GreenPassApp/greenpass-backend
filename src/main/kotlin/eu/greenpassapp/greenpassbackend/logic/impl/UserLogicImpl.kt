@@ -73,8 +73,7 @@ class UserLogicImpl(
             if(vacEntry.dt.isAfter(last.dt)) last = vacEntry
         }
 
-        //TODO: Remove commend in prod
-        //if(LocalDate.now().isAfter(last.dt)) throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can't use an old certificate")
+        if(first.tg != "840539006" || last.tg != "840539006") throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can only use Covid Certificates")
 
         return CovidVaccinate(last.dn, last.sd, last.dt, first.dt)
     }
@@ -86,8 +85,8 @@ class UserLogicImpl(
             if(recoverEntry.du.isAfter(last.du)) last = recoverEntry
         }
 
-        //TODO: Remove commend in prod
-        //if(LocalDate.now().isAfter(last.du)) throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can't use an old certificate")
+        if(last.tg != "840539006") throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can only use Covid Certificates")
+        if(last.du.isBefore(LocalDate.now())) throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can't use an old Recovery Certificate")
 
         return CovidRecover(last.du)
     }
@@ -99,9 +98,10 @@ class UserLogicImpl(
             if(testEntry.sc.isAfter(last.sc)) last = testEntry
         }
 
-        //TODO: Remove commend in prod
-        //if(Instant.now().isAfter(last.sc)) throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can't use an old certificate")
+        if(last.tg != "840539006") throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can only use Covid Certificates")
 
-        return CovidTest(last.nm, last.sc) //TODO check nm
+        if(last.tr == "260373001") throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can't use a positive test")
+
+        return CovidTest(last.tt, last.sc)
     }
 }
