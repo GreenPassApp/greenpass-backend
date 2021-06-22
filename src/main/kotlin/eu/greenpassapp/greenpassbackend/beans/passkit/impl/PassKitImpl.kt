@@ -54,9 +54,9 @@ class PassKitImpl(
                 )
             )
             .logoText("GreenPass")
-            .labelColor(Color.WHITE)
-            .foregroundColor(Color.WHITE)
-            .backgroundColor(Color(19, 90, 207))
+            .labelColor(Color.BLACK)
+            .foregroundColor(Color.BLACK)
+            .backgroundColor(Color.WHITE)
             .files(
                 PassResource("en.lproj/pass.strings", javaClass.getResourceAsStream("/pass/en.lproj/pass.strings")),
                 PassResource("de.lproj/pass.strings", javaClass.getResourceAsStream("/pass/de.lproj/pass.strings")),
