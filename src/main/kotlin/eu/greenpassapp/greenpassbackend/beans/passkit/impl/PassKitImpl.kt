@@ -9,9 +9,7 @@ import eu.greenpassapp.greenpassbackend.beans.passkit.PassKit
 import eu.greenpassapp.greenpassbackend.model.User
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
+import java.io.*
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -24,14 +22,11 @@ class PassKitImpl(
     @Value("\${presskit.certName}") private val certName: String,
     @Value("\${presskit.appleCertName}") private val appleCertName: String,
     @Value("\${presskit.typeId}") private val typeId: String,
-    @Value("\${cert.path}") private val certPath: String
-
-
 ) : PassKit {
     private val signer = PassSignerImpl.builder()
-        .keystore(FileInputStream("$certPath/$certName"), certPw)
+        .keystore(javaClass.getResourceAsStream("/certs/$certName"), certPw)
         .alias(alias)
-        .intermediateCertificate(FileInputStream("$certPath/$appleCertName"))
+        .intermediateCertificate(javaClass.getResourceAsStream("/certs/$appleCertName"))
         .build()
 
     override fun generatePass(user: User, certificate: String, serialNumber: String): ByteArray {
@@ -63,12 +58,12 @@ class PassKitImpl(
             .foregroundColor(Color.WHITE)
             .backgroundColor(Color(19, 90, 207))
             .files(
-                PassResource("en.lproj/pass.strings", File("src/main/resources/pass/en.lproj/pass.strings")),
-                PassResource("de.lproj/pass.strings", File("src/main/resources/pass/de.lproj/pass.strings")),
-                PassResource("src/main/resources/pass/icon.png"),
-                PassResource("src/main/resources/pass/icon@2x.png"),
-                PassResource("src/main/resources/pass/logo.png"),
-                PassResource("src/main/resources/pass/logo@2x.png"),
+                PassResource("en.lproj/pass.strings", javaClass.getResourceAsStream("/pass/en.lproj/pass.strings")),
+                PassResource("de.lproj/pass.strings", javaClass.getResourceAsStream("/pass/de.lproj/pass.strings")),
+                PassResource("icon.png", javaClass.getResourceAsStream("/pass/icon.png")),
+                PassResource("icon@2x.png", javaClass.getResourceAsStream("/pass/icon@2x.png")),
+                PassResource("logo.png", javaClass.getResourceAsStream("/pass/logo.png")),
+                PassResource("logo@2x.png", javaClass.getResourceAsStream("/pass/logo@2x.png")),
             )
             .passInformation(
                 StoreCard()

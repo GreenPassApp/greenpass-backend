@@ -6,7 +6,6 @@ import org.bouncycastle.asn1.DERSequence
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import org.bouncycastle.openssl.PEMParser
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter
-import org.bouncycastle.util.io.pem.PemReader
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -15,7 +14,8 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import se.digg.dgc.signatures.CertificateProvider
-import java.io.FileReader
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.math.BigInteger
 import java.net.URL
 import java.security.PublicKey
@@ -24,18 +24,18 @@ import java.security.SignatureException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
+
 @Service
 @Configuration
 @EnableScheduling
-class CertificateProviderImpl(
-    @Value("\${cert.path}") private val certPath: String
-) : CertificateProvider {
+class CertificateProviderImpl : CertificateProvider {
     private var certificates = mutableMapOf<String, String>()
     private var publicKey: PublicKey
 
     init {
-        val file = FileReader("$certPath/certs.pub")
-        val reader = PemReader(file)
+        val inputStream = javaClass.getResourceAsStream("/certs/certs.pub")
+        val reader = BufferedReader(InputStreamReader(inputStream!!))
+
         publicKey = readPemKeys(reader.readText()).first()
         reloadCerts()
     }
