@@ -40,6 +40,7 @@ class CertificateProviderImpl(
         reloadCerts()
     }
 
+    //TODO: replace fixedRate with cron
     @Scheduled(fixedRate = 1000 * 60 * 60 * 12) //every 12h
     private fun reloadCerts() {
         val trustList = URL("https://de.dscg.ubirch.com/trustList/DSC/").readText()

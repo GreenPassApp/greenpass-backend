@@ -7,5 +7,5 @@ interface UserLogic {
     fun update(certificate: String, token: String)
     fun getUser(link: String): User
     fun delete(token: String)
-    fun generatePressKit(certificate: String): ByteArray
+    fun generatePressKit(certificate: String, serialNumber: String): ByteArray
 }

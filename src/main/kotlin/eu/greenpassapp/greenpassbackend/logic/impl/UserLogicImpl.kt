@@ -51,9 +51,8 @@ class UserLogicImpl(
         userRepository.delete(getUser(jwtHelper.verifyTokenAndGetLink(token)))
     }
 
-    override fun generatePressKit(certificate: String): ByteArray {
-        digitalGreenCertificate.validate(certificate) //TODO: probably use getParsedUserFrom and check if valid
-        return passKit.generatePass(certificate)
+    override fun generatePressKit(certificate: String, serialNumber: String): ByteArray {
+        return passKit.generatePass(getParsedUserFrom(certificate), certificate, serialNumber)
     }
 
     private fun getParsedUserFrom(certificate: String): User {

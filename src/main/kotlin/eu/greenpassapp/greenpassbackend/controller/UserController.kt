@@ -52,19 +52,19 @@ class UserController(
     }
 
     @GetMapping(value = ["/generatePassWithBody"])
-    fun generatePassKitWithBody(@RequestBody certificate: RawCertificateDto): ResponseEntity<ByteArray> {
-        return ResponseEntity<ByteArray>(userLogic.generatePressKit(certificate.data), HttpStatus.OK)
+    fun generatePassKitWithBody(@RequestBody certificate: RawCertificateDto, @RequestParam("serialNumber") serialNumber: String): ResponseEntity<ByteArray> {
+        return ResponseEntity<ByteArray>(userLogic.generatePressKit(certificate.data, serialNumber), HttpStatus.OK)
     }
 
     @GetMapping(value = ["/pass"])
-    fun generatePassKit(@RequestParam("cert") cert: String): ResponseEntity<ByteArrayResource> {
+    fun generatePassKit(@RequestParam("cert") cert: String, @RequestParam("serialNumber") serialNumber: String): ResponseEntity<ByteArrayResource> {
         val header = HttpHeaders()
         header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pass.pkpass")
         header.add("Cache-Control", "no-cache, no-store, must-revalidate")
         header.add("Pragma", "no-cache")
         header.add("Expires", "0")
 
-        val resource = ByteArrayResource(userLogic.generatePressKit(cert))
+        val resource = ByteArrayResource(userLogic.generatePressKit(cert, serialNumber))
 
         return ResponseEntity.ok()
             .headers(header)
