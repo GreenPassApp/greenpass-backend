@@ -19,13 +19,19 @@ import java.time.format.DateTimeFormatter
 @Service
 class PassKitImpl(
     @Value("\${presskit.teamId}") private val teamId: String,
-    @Value("\${presskit.certPw}") private val certPw: String
+    @Value("\${presskit.certPw}") private val certPw: String,
+    @Value("\${presskit.alias}") private val alias: String,
+    @Value("\${presskit.certName}") private val certName: String,
+    @Value("\${presskit.appleCertName}") private val appleCertName: String,
+    @Value("\${presskit.typeId}") private val typeId: String,
+    @Value("\${cert.path}") private val certPath: String
+
 
 ) : PassKit {
     private val signer = PassSignerImpl.builder()
-        .keystore(FileInputStream("src/main/resources/Zertifikate.p12"), certPw)
-        .alias("Jakob Stadlhuber")
-        .intermediateCertificate(FileInputStream("src/main/resources/AppleWWDRCA.cer"))
+        .keystore(FileInputStream("$certPath/$certName"), certPw)
+        .alias(alias)
+        .intermediateCertificate(FileInputStream("$certPath/$appleCertName"))
         .build()
 
     override fun generatePass(user: User, certificate: String, serialNumber: String): ByteArray {
@@ -42,7 +48,7 @@ class PassKitImpl(
 
         val pass = Pass()
             .teamIdentifier(teamId)
-            .passTypeIdentifier("pass.eu.greenapp.certest")
+            .passTypeIdentifier(typeId)
             .organizationName("GreenPass App")
             .description("GreenPass App")
             .serialNumber(serialNumber)
