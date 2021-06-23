@@ -5,12 +5,14 @@ import eu.greenpassapp.greenpassbackend.dto.UserArtifactsDto
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
 import eu.greenpassapp.greenpassbackend.model.User
 import org.springframework.core.io.ByteArrayResource
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import java.time.LocalDateTime
 
 
 @RestController
@@ -23,17 +25,21 @@ class UserController(
     private val userLogic: UserLogic,
 ) {
     @PostMapping(value = ["/insert"])
-    fun insertUser(@RequestBody certificate: RawCertificateDto): ResponseEntity<UserArtifactsDto> {
-        val result = userLogic.insert(certificate.data)
+    fun insertUser(@RequestBody certificate: RawCertificateDto,
+                   @RequestParam("validUntil") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) validUntil: LocalDateTime
+    ): ResponseEntity<UserArtifactsDto> {
+        val result = userLogic.insert(certificate.data, validUntil)
         return ResponseEntity<UserArtifactsDto>(UserArtifactsDto(result.first.link!!, result.second), HttpStatus.OK)
     }
 
     @PostMapping(value = ["/update"])
     fun updateUser(
-        @RequestBody certificate: RawCertificateDto, @RequestHeader headers: Map<String, String>,
+        @RequestBody certificate: RawCertificateDto,
+        @RequestHeader headers: Map<String, String>,
+        @RequestParam("validUntil") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) validUntil: LocalDateTime
     ): ResponseEntity<Any> {
         val token = headers["authorization"] ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "No token set")
-        userLogic.update(certificate.data, token)
+        userLogic.update(certificate.data, validUntil, token)
         return ResponseEntity<Any>(HttpStatus.NO_CONTENT)
     }
 

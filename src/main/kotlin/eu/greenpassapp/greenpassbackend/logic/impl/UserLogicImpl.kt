@@ -19,6 +19,7 @@ import se.digg.dgc.payload.v1.RecoveryEntry
 import se.digg.dgc.payload.v1.TestEntry
 import se.digg.dgc.payload.v1.VaccinationEntry
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 @Transactional(rollbackFor = [Exception::class])
@@ -28,23 +29,21 @@ class UserLogicImpl(
     private val digitalGreenCertificate: DigitalGreenCertificate,
     private val passKit: PassKit
 ) : UserLogic {
-    override fun insert(certificate: String): Pair<User, String> {
-        val user = getParsedUserFrom(certificate)
-
+    override fun insert(certificate: String, validUntil: LocalDateTime): Pair<User, String> {
+        val user = getParsedUserFrom(certificate, validUntil)
         val newUser = userRepository.saveAndFlush(user)
         val token = jwtHelper.getToken(newUser.link!!)
         return Pair(newUser, token)
     }
 
-    override fun update(certificate: String, token: String) {
-        val user = getParsedUserFrom(certificate)
-
+    override fun update(certificate: String, validUntil: LocalDateTime, token: String) {
+        val user = getParsedUserFrom(certificate, validUntil)
         user.link = jwtHelper.verifyTokenAndGetLink(token)
         userRepository.saveAndFlush(user)
     }
 
     override fun getUser(link: String): User{
-        return userRepository.findByIdOrNull(link) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No User found")
+        return userRepository.findByLinkAndValidUtilAfter(link, LocalDateTime.now()) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No User found")
     }
 
     override fun delete(token: String) {
@@ -55,9 +54,13 @@ class UserLogicImpl(
         return passKit.generatePass(getParsedUserFrom(certificate), certificate, serialNumber)
     }
 
-    private fun getParsedUserFrom(certificate: String): User {
+    override fun deleteInvalidUsers() {
+        userRepository.deleteAllByValidUtilBefore(LocalDateTime.now())
+    }
+
+    private fun getParsedUserFrom(certificate: String, validUntil: LocalDateTime? = null): User {
         val parsedCert = digitalGreenCertificate.validate(certificate)
-        val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob))
+        val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob), validUntil)
         user.vaccinated = getVaccinatedFromUser(parsedCert)
         user.recovered = getRecoveredFromUser(parsedCert)
         user.tested = getTestedFromUser(parsedCert)

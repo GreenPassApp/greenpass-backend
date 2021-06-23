@@ -1,12 +1,14 @@
 package eu.greenpassapp.greenpassbackend.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.annotations.GenericGenerator
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.persistence.*
 
 
 @Entity
-data class User(val firstName: String, val lastName: String, val birthday: LocalDate){
+data class User(val firstName: String, val lastName: String, val birthday: LocalDate, @JsonIgnore val validUtil: LocalDateTime?){
     @Id
     @GenericGenerator(name="random_link",strategy="eu.greenpassapp.greenpassbackend.generator.SecureRandomGenerator")
     @GeneratedValue(generator="random_link")
