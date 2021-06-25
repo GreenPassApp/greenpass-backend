@@ -1,5 +1,6 @@
 package eu.greenpassapp.greenpassbackend.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDate
 import java.util.*
 import javax.persistence.Entity
@@ -10,5 +11,6 @@ import javax.persistence.Id
 data class CovidVaccinate(var highestCurrDose: Int, var dosesNeeded: Int, var dateOfLastVaccinate: LocalDate, var dateOfFirst: LocalDate) {
     @Id
     @GeneratedValue
-    val id: UUID? = null
+    @JsonIgnore
+    val id: Int? = null
 }

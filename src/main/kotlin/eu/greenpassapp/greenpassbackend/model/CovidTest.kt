@@ -1,5 +1,6 @@
 package eu.greenpassapp.greenpassbackend.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.Instant
 import java.util.*
 import javax.persistence.Entity
@@ -10,5 +11,6 @@ import javax.persistence.Id
 data class CovidTest(var type: String, var dateOfSampling: Instant) {
     @Id
     @GeneratedValue
-    val id: UUID? = null
+    @JsonIgnore
+    val id: Int? = null
 }

@@ -17,10 +17,10 @@ import java.time.LocalDateTime
 
 @RestController
 @RequestMapping(
-    value = ["/api/user"],
+    value = ["/user"],
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
-@CrossOrigin
+@CrossOrigin(origins = ["https://greenpassapp.eu/"])
 class UserController(
     private val userLogic: UserLogic,
 ) {
