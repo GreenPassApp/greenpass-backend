@@ -33,6 +33,7 @@ dependencies {
     implementation("org.bouncycastle:bcpkix-jdk15on:1.69")
     implementation("org.bouncycastle:bcmail-jdk15on:1.69")
     implementation("com.beust:klaxon:5.5")
+    implementation("com.maxmind.geoip2:geoip2:2.15.0")
     //implementation("org.mariadb.jdbc:mariadb-java-client:2.7.3")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
