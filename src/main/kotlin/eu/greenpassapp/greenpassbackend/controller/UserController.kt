@@ -1,12 +1,10 @@
 package eu.greenpassapp.greenpassbackend.controller
 
-import com.maxmind.db.CHMCache
-import com.maxmind.geoip2.DatabaseReader
+import eu.greenpassapp.greenpassbackend.beans.geo.GeoIP
 import eu.greenpassapp.greenpassbackend.dto.RawCertificateDto
 import eu.greenpassapp.greenpassbackend.dto.UserArtifactsDto
+import eu.greenpassapp.greenpassbackend.dto.UserWithCountryCode
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
-import eu.greenpassapp.greenpassbackend.model.User
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpHeaders
@@ -15,9 +13,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import java.net.InetAddress
 import java.time.LocalDateTime
-import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 
@@ -30,11 +26,8 @@ import javax.servlet.http.HttpServletRequest
 class UserController(
     private val userLogic: UserLogic,
     private val request: HttpServletRequest,
-    @Value("\${geo.path}") private val geoPath: String
-
+    private val geoIP: GeoIP
 ) {
-    val reader: DatabaseReader = DatabaseReader.Builder(javaClass.getResourceAsStream(geoPath)).withCache(CHMCache()).build()
-
     @PostMapping(value = ["/insert"])
     fun insertUser(
         @RequestBody certificate: RawCertificateDto,
@@ -65,14 +58,13 @@ class UserController(
     }
 
     @GetMapping(value = ["/get/{link}"])
-    fun getUser(@PathVariable link: String): ResponseEntity<User> {
-        return ResponseEntity<User>(userLogic.getUser(link),HttpStatus.OK)
+    fun getUser(@PathVariable link: String): ResponseEntity<UserWithCountryCode> {
+        return ResponseEntity<UserWithCountryCode>(UserWithCountryCode(userLogic.getUser(link), geoIP.getCountryCode(request)),HttpStatus.OK)
     }
 
     @GetMapping(value = ["/countryCode"])
     fun getCountryCode(): ResponseEntity<String> {
-        val response = reader.city(InetAddress.getByName(getClientIpAddress()))
-        return ResponseEntity<String>(response.country.isoCode, HttpStatus.OK)
+        return ResponseEntity<String>(geoIP.getCountryCode(request), HttpStatus.OK)
     }
 
     @GetMapping(value = ["/generatePassWithBody"])
@@ -100,14 +92,5 @@ class UserController(
             .headers(header)
             .contentType(MediaType.parseMediaType("application/octet-stream"))
             .body(resource)
-    }
-
-    private fun getClientIpAddress(): String {
-        val xForwardedForHeader = request.getHeader("X-Forwarded-For")
-        return if (xForwardedForHeader == null) {
-            request.remoteAddr
-        } else {
-            StringTokenizer(xForwardedForHeader, ",").nextToken().trim { it <= ' ' }
-        }
     }
 }
