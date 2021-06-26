@@ -35,7 +35,7 @@ class PassKitImpl(
         val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZoneId.systemDefault())
 
         val listOfTextField = mutableListOf<TextField>()
-        if(user.vaccinated != null) listOfTextField.add(TextField("certTypeVac", dateOfLastVaccinate, "vac"))
+        if(user.vaccinated != null) listOfTextField.add(TextField("certTypeVac", "$dateOfLastVaccinate (${user.vaccinated?.highestCurrDose}/${user.vaccinated?.dosesNeeded})", "vac"))
         if(user.recovered != null) listOfTextField.add(TextField("certTypeRec", validUntilRecovered, "rec"))
         if(user.tested != null) listOfTextField.add(TextField("certTypeTest", formatter.format(user.tested?.dateOfSampling), "test"))
 
@@ -68,8 +68,8 @@ class PassKitImpl(
             .passInformation(
                 StoreCard()
                     .headerFields(
-                        TextField("certificat_label", "certificate", "Covid-19")
-                            .textAlignment(TextAlignment.RIGHT)
+                        TextField("certificat_label", "certificate", "COVID-19")
+                            .textAlignment(TextAlignment.RIGHT),
                     )
                     .primaryFields(
                         listOfTextField[0]
