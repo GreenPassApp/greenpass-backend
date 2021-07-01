@@ -1,6 +1,6 @@
 
 [![Logo](https://greenpassapp.eu/assets/presskit/logos/GreenPass_Logo.svg)](https://greenpassapp.eu/)
-# GreenPass - App
+# GreenPass - Backend
 
 This repository contains the backend of GreenPass. It is realized using Kotlin and Spring Boot. This Project contains the optional features sharing and the generation of Apple Wallet Passes.
 
