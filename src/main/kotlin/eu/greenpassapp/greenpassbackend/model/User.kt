@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 
-data class User(val firstName: String, val lastName: String, val birthday: LocalDate, val validUtil: LocalDateTime?){
+data class User(val firstName: String, val lastName: String, val birthday: LocalDate){
     var vaccinated: CovidVaccinate? = null
 
     var tested: CovidTest? = null

@@ -17,24 +17,52 @@ import se.digg.dgc.payload.v1.VaccinationEntry
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+/**
+ * User Logic Impl
+ *
+ * The concrete implementation of UserLogic
+ *
+ */
 @Service
 class UserLogicImpl(
     private val digitalGreenCertificate: DigitalGreenCertificate,
     private val passKit: PassKit
 ) : UserLogic {
-    private fun getParsedUserFrom(certificate: String, validUntil: LocalDateTime? = null): User {
+    /**
+     * Creates a pkpass.
+     *
+     * @param certificate EU QR-Code certificate
+     * @param serialNumber for generating a pass, the same serialnumber is a useful hint for the apple wallet to replace the old pkpass
+     *
+     * @return Pkpass as a ByteArray.
+     */
+    override fun generatePressKit(certificate: String, serialNumber: String): ByteArray {
+        return passKit.generatePass(getParsedUserFrom(certificate), certificate, serialNumber)
+    }
+
+    /**
+     * Validates and creates certificate.
+     *
+     * @param certificate EU QR-Code certificate
+     *
+     * @return User Object generated from the certificate.
+     */
+    private fun getParsedUserFrom(certificate: String): User {
         val parsedCert = digitalGreenCertificate.validate(certificate)
-        val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob), validUntil)
+        val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob))
         user.vaccinated = getVaccinatedFromUser(parsedCert)
         user.recovered = getRecoveredFromUser(parsedCert)
         user.tested = getTestedFromUser(parsedCert)
         return user
     }
 
-    override fun generatePressKit(certificate: String, serialNumber: String): ByteArray {
-        return passKit.generatePass(getParsedUserFrom(certificate), certificate, serialNumber)
-    }
-
+    /**
+     * Parses Vaccinating information from certificate.
+     *
+     * @param cert parsed certificate
+     *
+     * @return Optional CovidVaccinate.
+     */
     private fun getVaccinatedFromUser(cert : DigitalCovidCertificate): CovidVaccinate? {
         val firstVacEntry = cert.v?.firstOrNull() ?: return null
         var first: VaccinationEntry = firstVacEntry
@@ -49,6 +77,13 @@ class UserLogicImpl(
         return CovidVaccinate(last.dn, last.sd, last.dt, first.dt)
     }
 
+    /**
+     * Parses recovering information from certificate.
+     *
+     * @param cert parsed certificate
+     *
+     * @return Optional CovidRecover.
+     */
     private fun getRecoveredFromUser(cert: DigitalCovidCertificate): CovidRecover? {
         val firstRecoverEntry = cert.r?.firstOrNull() ?: return null
         var last: RecoveryEntry = firstRecoverEntry
@@ -62,6 +97,13 @@ class UserLogicImpl(
         return CovidRecover(last.du)
     }
 
+    /**
+     * Parses testing information from certificate.
+     *
+     * @param cert parsed certificate
+     *
+     * @return Optional CovidTest.
+     */
     private fun getTestedFromUser(cert: DigitalCovidCertificate): CovidTest? {
         val firstTestEntry = cert.t?.firstOrNull() ?: return null
         var last: TestEntry = firstTestEntry

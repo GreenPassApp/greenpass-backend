@@ -13,15 +13,20 @@ import java.io.*
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-
+/**
+ * PassKit Impl
+ *
+ * This class generates the concrete pkpass for the Apple Wallet
+ *
+ */
 @Service
 class PassKitImpl(
-    @Value("\${presskit.teamId}") private val teamId: String,
-    @Value("\${presskit.certPw}") private val certPw: String,
+    @Value("\${presskit.teamId}") private val teamId: String, //Apple TeamId
+    @Value("\${presskit.certPw}") private val certPw: String, //Password for the certificate
     @Value("\${presskit.alias}") private val alias: String,
     @Value("\${presskit.certName}") private val certName: String,
     @Value("\${presskit.appleCertName}") private val appleCertName: String,
-    @Value("\${presskit.typeId}") private val typeId: String,
+    @Value("\${presskit.typeId}") private val typeId: String, //Apple Type
 ) : PassKit {
     private val signer = PassSignerImpl.builder()
         .keystore(javaClass.getResourceAsStream("/certs/$certName"), certPw)
@@ -29,6 +34,15 @@ class PassKitImpl(
         .intermediateCertificate(javaClass.getResourceAsStream("/certs/$appleCertName"))
         .build()
 
+    /**
+     * Creates a pkpass bytearray.
+     *
+     * @param user validated object
+     * @param certificate EU QR-Code certificate
+     * @param serialNumber for generating a pass, the same serialnumber is a useful hint for the apple wallet to replace the old pkpass
+     *
+     * @return Pkpass as a ByteArray.
+     */
     override fun generatePass(user: User, certificate: String, serialNumber: String): ByteArray {
         val dateOfLastVaccinate = user.vaccinated?.dateOfLastVaccinate?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
         val validUntilRecovered = user.recovered?.validUntil?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))

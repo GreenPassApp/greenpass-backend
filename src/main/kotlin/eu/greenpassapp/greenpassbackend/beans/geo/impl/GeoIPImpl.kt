@@ -9,6 +9,12 @@ import java.net.InetAddress
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 
+/**
+ * GeoIP Impl
+ *
+ * This class uses a locally saved database to get the country code for an IP-Address
+ *
+ */
 @Service
 class GeoIPImpl(
     @Value("\${geo.path}") private val geoPath: String

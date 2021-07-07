@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("org.owasp.dependencycheck") version "6.2.2"
+    id("org.jetbrains.dokka") version "1.5.0"
     id("org.springframework.boot") version "2.5.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     kotlin("jvm") version "1.5.10"
@@ -32,6 +33,7 @@ dependencies {
     implementation("org.bouncycastle:bcmail-jdk15on:1.69")
     implementation("com.beust:klaxon:5.5")
     implementation("com.maxmind.geoip2:geoip2:2.15.0")
+    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.5.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
