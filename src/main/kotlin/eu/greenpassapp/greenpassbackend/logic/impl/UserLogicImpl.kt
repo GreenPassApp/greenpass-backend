@@ -1,18 +1,14 @@
 package eu.greenpassapp.greenpassbackend.logic.impl
 
 import eu.greenpassapp.greenpassbackend.beans.dgc.DigitalGreenCertificate
-import eu.greenpassapp.greenpassbackend.beans.jwt.JWTHelper
 import eu.greenpassapp.greenpassbackend.beans.passkit.PassKit
-import eu.greenpassapp.greenpassbackend.dao.UserRepository
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
 import eu.greenpassapp.greenpassbackend.model.CovidRecover
 import eu.greenpassapp.greenpassbackend.model.CovidTest
 import eu.greenpassapp.greenpassbackend.model.CovidVaccinate
 import eu.greenpassapp.greenpassbackend.model.User
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
 import se.digg.dgc.payload.v1.DigitalCovidCertificate
 import se.digg.dgc.payload.v1.RecoveryEntry
@@ -22,42 +18,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
-@Transactional(rollbackFor = [Exception::class])
 class UserLogicImpl(
-    private val userRepository: UserRepository,
-    private val jwtHelper: JWTHelper,
     private val digitalGreenCertificate: DigitalGreenCertificate,
     private val passKit: PassKit
 ) : UserLogic {
-    override fun insert(certificate: String, validUntil: LocalDateTime): Pair<User, String> {
-        val user = getParsedUserFrom(certificate, validUntil)
-        val newUser = userRepository.saveAndFlush(user)
-        val token = jwtHelper.getToken(newUser.link!!)
-        return Pair(newUser, token)
-    }
-
-    override fun update(certificate: String, validUntil: LocalDateTime, token: String) {
-        val user = getParsedUserFrom(certificate, validUntil)
-        user.link = jwtHelper.verifyTokenAndGetLink(token)
-        userRepository.saveAndFlush(user)
-    }
-
-    override fun getUser(link: String): User{
-        return userRepository.findByLinkAndValidUtilAfter(link, LocalDateTime.now()) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No User found")
-    }
-
-    override fun delete(token: String) {
-        userRepository.delete(getUser(jwtHelper.verifyTokenAndGetLink(token)))
-    }
-
-    override fun generatePressKit(certificate: String, serialNumber: String): ByteArray {
-        return passKit.generatePass(getParsedUserFrom(certificate), certificate, serialNumber)
-    }
-
-    override fun deleteInvalidUsers() {
-        userRepository.deleteAllByValidUtilBefore(LocalDateTime.now())
-    }
-
     private fun getParsedUserFrom(certificate: String, validUntil: LocalDateTime? = null): User {
         val parsedCert = digitalGreenCertificate.validate(certificate)
         val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob), validUntil)
@@ -65,6 +29,10 @@ class UserLogicImpl(
         user.recovered = getRecoveredFromUser(parsedCert)
         user.tested = getTestedFromUser(parsedCert)
         return user
+    }
+
+    override fun generatePressKit(certificate: String, serialNumber: String): ByteArray {
+        return passKit.generatePass(getParsedUserFrom(certificate), certificate, serialNumber)
     }
 
     private fun getVaccinatedFromUser(cert : DigitalCovidCertificate): CovidVaccinate? {

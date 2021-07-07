@@ -1,19 +1,14 @@
 package eu.greenpassapp.greenpassbackend.controller
 
 import eu.greenpassapp.greenpassbackend.beans.geo.GeoIP
-import eu.greenpassapp.greenpassbackend.dto.RawCertificateDto
-import eu.greenpassapp.greenpassbackend.dto.UserArtifactsDto
-import eu.greenpassapp.greenpassbackend.dto.UserWithCountryCode
+import eu.greenpassapp.greenpassbackend.model.RawCertificateDto
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
 import org.springframework.core.io.ByteArrayResource
-import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
-import java.time.LocalDateTime
 import javax.servlet.http.HttpServletRequest
 
 
@@ -28,40 +23,6 @@ class UserController(
     private val request: HttpServletRequest,
     private val geoIP: GeoIP
 ) {
-    @PostMapping(value = ["/insert"])
-    fun insertUser(
-        @RequestBody certificate: RawCertificateDto,
-        @RequestParam("validUntil") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) validUntil: LocalDateTime
-    ): ResponseEntity<UserArtifactsDto> {
-        val result = userLogic.insert(certificate.data, validUntil)
-        return ResponseEntity<UserArtifactsDto>(UserArtifactsDto(result.first.link!!, result.second), HttpStatus.OK)
-    }
-
-    @PostMapping(value = ["/update"])
-    fun updateUser(
-        @RequestBody certificate: RawCertificateDto,
-        @RequestHeader headers: Map<String, String>,
-        @RequestParam("validUntil") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) validUntil: LocalDateTime
-    ): ResponseEntity<Any> {
-        val token = headers["authorization"] ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "No token set")
-        userLogic.update(certificate.data, validUntil, token)
-        return ResponseEntity<Any>(HttpStatus.NO_CONTENT)
-    }
-
-    @DeleteMapping(value = ["/delete"])
-    fun deleteUser(
-        @RequestHeader headers: Map<String, String>,
-    ): ResponseEntity<Any> {
-        val token = headers["authorization"] ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "No token set")
-        userLogic.delete(token)
-        return ResponseEntity<Any>(HttpStatus.NO_CONTENT)
-    }
-
-    @GetMapping(value = ["/get/{link}"])
-    fun getUser(@PathVariable link: String): ResponseEntity<UserWithCountryCode> {
-        return ResponseEntity<UserWithCountryCode>(UserWithCountryCode(userLogic.getUser(link), geoIP.getCountryCode(request)),HttpStatus.OK)
-    }
-
     @GetMapping(value = ["/countryCode"])
     fun getCountryCode(): ResponseEntity<String> {
         return ResponseEntity<String>(geoIP.getCountryCode(request), HttpStatus.OK)
