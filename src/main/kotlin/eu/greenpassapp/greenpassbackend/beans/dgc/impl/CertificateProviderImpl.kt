@@ -52,7 +52,14 @@ class CertificateProviderImpl : CertificateProvider {
     //TODO: replace fixedRate with cron
     @Scheduled(fixedRate = 1000 * 60 * 60 * 12) //every 12h
     private fun reloadCerts() {
-        val trustList = URL("https://de.dscg.ubirch.com/trustList/DSC/").readText()
+        val trustList = try {
+            URL("https://de.dscg.ubirch.com/trustList/DSC/").readText()
+        } catch (e: Exception){
+            val inputStream = javaClass.getResourceAsStream("/certs/FallbackTrustList")
+            val reader = BufferedReader(InputStreamReader(inputStream!!))
+            reader.readText()
+        }
+
         val json = decodeDscList(trustList)
 
         val parsedCerts = Klaxon().parse<TrustList>(json)

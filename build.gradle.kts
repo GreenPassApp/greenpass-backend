@@ -32,7 +32,6 @@ dependencies {
     implementation("org.bouncycastle:bcpkix-jdk15on:1.69")
     implementation("org.bouncycastle:bcmail-jdk15on:1.69")
     implementation("com.beust:klaxon:5.5")
-    implementation("com.maxmind.geoip2:geoip2:2.15.0")
     dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.5.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

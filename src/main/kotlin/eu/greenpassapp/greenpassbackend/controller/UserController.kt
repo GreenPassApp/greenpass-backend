@@ -1,14 +1,15 @@
 package eu.greenpassapp.greenpassbackend.controller
 
-import eu.greenpassapp.greenpassbackend.beans.geo.GeoIP
-import eu.greenpassapp.greenpassbackend.model.RawCertificateDto
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
+import eu.greenpassapp.greenpassbackend.model.RawCertificateDto
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 import javax.servlet.http.HttpServletRequest
 
 /**
@@ -26,21 +27,12 @@ import javax.servlet.http.HttpServletRequest
 class UserController(
     private val userLogic: UserLogic,
     private val request: HttpServletRequest,
-    private val geoIP: GeoIP
+    @Value("\${controller.apikey}") private val apikey: String
 ) {
-    /**
-     * Maps the User Requests IP-Address to a Country Code.
-     *
-     * @return the Country Code.
-     */
-    @GetMapping(value = ["/countryCode"])
-    fun getCountryCode(): ResponseEntity<String> {
-        return ResponseEntity<String>(geoIP.getCountryCode(request), HttpStatus.OK)
-    }
-
     /**
      * Creates a pkpass file without header information.
      *
+     * @param userApiKey apiKey
      * @param certificate EU QR-Code certificate in the body
      * @param serialNumber for generating a pass, the same serialnumber is a useful hint for the apple wallet to replace the old pkpass
      *
@@ -48,25 +40,31 @@ class UserController(
      */
     @GetMapping(value = ["/generatePassWithBody"])
     fun generatePassKitWithBody(
-        @RequestBody certificate: RawCertificateDto,
-        @RequestParam("serialNumber") serialNumber: String
+        @RequestHeader("Authorization") userApiKey: String,
+        @RequestHeader("X-Serial-Number") serialNumber: String,
+        @RequestBody certificate: RawCertificateDto
     ): ResponseEntity<ByteArray> {
+        if(apikey != userApiKey) throw ResponseStatusException(HttpStatus.FORBIDDEN, "Authorization forbidden")
         return ResponseEntity<ByteArray>(userLogic.generatePressKit(certificate.data, serialNumber), HttpStatus.OK)
     }
 
     /**
      * Creates a pkpass file with header information.
      *
-     * @param certificate EU QR-Code certificate as a param
+     * @param userApiKey apiKey
+     * @param certificate EU QR-Code certificate as a header param
      * @param serialNumber for generating a pass, the same serialnumber is a useful hint for the apple wallet to replace the old pkpass
      *
      * @return the Country Code.
      */
     @GetMapping(value = ["/pass"])
     fun generatePassKit(
-        @RequestParam("cert") cert: String,
-        @RequestParam("serialNumber") serialNumber: String
+        @RequestHeader("Authorization") userApiKey: String,
+        @RequestHeader("X-Digital-Certificate") cert: String,
+        @RequestHeader("X-Serial-Number") serialNumber: String
     ): ResponseEntity<ByteArrayResource> {
+        if(apikey != userApiKey) throw ResponseStatusException(HttpStatus.FORBIDDEN, "Authorization forbidden")
+
         val header = HttpHeaders()
         header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pass.pkpass")
         header.add("Cache-Control", "no-cache, no-store, must-revalidate")
