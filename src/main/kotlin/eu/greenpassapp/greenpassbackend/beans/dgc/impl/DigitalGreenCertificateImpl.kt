@@ -7,7 +7,7 @@ import se.digg.dgc.service.impl.DefaultDGCDecoder
 import se.digg.dgc.signatures.CertificateProvider
 
 @Service
-class DigitalGreenCertificateImpl(private val certificateProvider: CertificateProvider): DigitalGreenCertificate {
+class DigitalGreenCertificateImpl(certificateProvider: CertificateProvider): DigitalGreenCertificate {
     val dgcDecoder = DefaultDGCDecoder(null, certificateProvider)
 
     override fun validate(certificate: String): DigitalCovidCertificate {

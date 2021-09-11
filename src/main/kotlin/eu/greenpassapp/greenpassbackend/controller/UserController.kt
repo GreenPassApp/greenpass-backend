@@ -1,22 +1,23 @@
 package eu.greenpassapp.greenpassbackend.controller
 
-import eu.greenpassapp.greenpassbackend.beans.geo.GeoIP
-import eu.greenpassapp.greenpassbackend.dto.RawCertificateDto
-import eu.greenpassapp.greenpassbackend.dto.UserArtifactsDto
-import eu.greenpassapp.greenpassbackend.dto.UserWithCountryCode
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
+import eu.greenpassapp.greenpassbackend.model.RawCertificateDto
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.ByteArrayResource
-import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import java.time.LocalDateTime
 import javax.servlet.http.HttpServletRequest
 
-
+/**
+ * User REST Controller
+ *
+ * This class represents the view layer which delegate to the logic layer
+ *
+ */
 @RestController
 @RequestMapping(
     value = ["/user"],
@@ -26,60 +27,44 @@ import javax.servlet.http.HttpServletRequest
 class UserController(
     private val userLogic: UserLogic,
     private val request: HttpServletRequest,
-    private val geoIP: GeoIP
+    @Value("\${controller.apikey}") private val apikey: String
 ) {
-    @PostMapping(value = ["/insert"])
-    fun insertUser(
-        @RequestBody certificate: RawCertificateDto,
-        @RequestParam("validUntil") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) validUntil: LocalDateTime
-    ): ResponseEntity<UserArtifactsDto> {
-        val result = userLogic.insert(certificate.data, validUntil)
-        return ResponseEntity<UserArtifactsDto>(UserArtifactsDto(result.first.link!!, result.second), HttpStatus.OK)
-    }
-
-    @PostMapping(value = ["/update"])
-    fun updateUser(
-        @RequestBody certificate: RawCertificateDto,
-        @RequestHeader headers: Map<String, String>,
-        @RequestParam("validUntil") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) validUntil: LocalDateTime
-    ): ResponseEntity<Any> {
-        val token = headers["authorization"] ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "No token set")
-        userLogic.update(certificate.data, validUntil, token)
-        return ResponseEntity<Any>(HttpStatus.NO_CONTENT)
-    }
-
-    @DeleteMapping(value = ["/delete"])
-    fun deleteUser(
-        @RequestHeader headers: Map<String, String>,
-    ): ResponseEntity<Any> {
-        val token = headers["authorization"] ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "No token set")
-        userLogic.delete(token)
-        return ResponseEntity<Any>(HttpStatus.NO_CONTENT)
-    }
-
-    @GetMapping(value = ["/get/{link}"])
-    fun getUser(@PathVariable link: String): ResponseEntity<UserWithCountryCode> {
-        return ResponseEntity<UserWithCountryCode>(UserWithCountryCode(userLogic.getUser(link), geoIP.getCountryCode(request)),HttpStatus.OK)
-    }
-
-    @GetMapping(value = ["/countryCode"])
-    fun getCountryCode(): ResponseEntity<String> {
-        return ResponseEntity<String>(geoIP.getCountryCode(request), HttpStatus.OK)
-    }
-
+    /**
+     * Creates a pkpass file without header information.
+     *
+     * @param userApiKey apiKey
+     * @param certificate EU QR-Code certificate in the body
+     * @param serialNumber for generating a pass, the same serialnumber is a useful hint for the apple wallet to replace the old pkpass
+     *
+     * @return the Country Code.
+     */
     @GetMapping(value = ["/generatePassWithBody"])
     fun generatePassKitWithBody(
-        @RequestBody certificate: RawCertificateDto,
-        @RequestParam("serialNumber") serialNumber: String
+        @RequestHeader("Authorization") userApiKey: String,
+        @RequestHeader("X-Serial-Number") serialNumber: String,
+        @RequestBody certificate: RawCertificateDto
     ): ResponseEntity<ByteArray> {
+        if(apikey != userApiKey) throw ResponseStatusException(HttpStatus.FORBIDDEN, "Authorization forbidden")
         return ResponseEntity<ByteArray>(userLogic.generatePressKit(certificate.data, serialNumber), HttpStatus.OK)
     }
 
+    /**
+     * Creates a pkpass file with header information.
+     *
+     * @param userApiKey apiKey
+     * @param certificate EU QR-Code certificate as a header param
+     * @param serialNumber for generating a pass, the same serialnumber is a useful hint for the apple wallet to replace the old pkpass
+     *
+     * @return the Country Code.
+     */
     @GetMapping(value = ["/pass"])
     fun generatePassKit(
-        @RequestParam("cert") cert: String,
-        @RequestParam("serialNumber") serialNumber: String
+        @RequestHeader("Authorization") userApiKey: String,
+        @RequestHeader("X-Digital-Certificate") cert: String,
+        @RequestHeader("X-Serial-Number") serialNumber: String
     ): ResponseEntity<ByteArrayResource> {
+        if(apikey != userApiKey) throw ResponseStatusException(HttpStatus.FORBIDDEN, "Authorization forbidden")
+
         val header = HttpHeaders()
         header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pass.pkpass")
         header.add("Cache-Control", "no-cache, no-store, must-revalidate")

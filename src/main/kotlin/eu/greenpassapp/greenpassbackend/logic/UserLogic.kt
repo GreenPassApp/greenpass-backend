@@ -1,13 +1,14 @@
 package eu.greenpassapp.greenpassbackend.logic
 
-import eu.greenpassapp.greenpassbackend.model.User
-import java.time.LocalDateTime
 
+/**
+ * User Logic
+ *
+ * The Logic Layer will be used from the view layer.
+ * This class is used for the generation of the Apple Wallet pkpass Files and to map a IP to a CountryCode.
+ * Everything appears locally on the server without third party server connections
+ *
+ */
 interface UserLogic {
-    fun insert(certificate: String, validUntil: LocalDateTime): Pair<User, String>
-    fun update(certificate: String, validUntil: LocalDateTime, token: String)
-    fun getUser(link: String): User
-    fun delete(token: String)
     fun generatePressKit(certificate: String, serialNumber: String): ByteArray
-    fun deleteInvalidUsers()
 }

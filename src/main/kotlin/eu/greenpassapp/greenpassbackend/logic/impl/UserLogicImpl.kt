@@ -1,18 +1,14 @@
 package eu.greenpassapp.greenpassbackend.logic.impl
 
 import eu.greenpassapp.greenpassbackend.beans.dgc.DigitalGreenCertificate
-import eu.greenpassapp.greenpassbackend.beans.jwt.JWTHelper
 import eu.greenpassapp.greenpassbackend.beans.passkit.PassKit
-import eu.greenpassapp.greenpassbackend.dao.UserRepository
 import eu.greenpassapp.greenpassbackend.logic.UserLogic
 import eu.greenpassapp.greenpassbackend.model.CovidRecover
 import eu.greenpassapp.greenpassbackend.model.CovidTest
 import eu.greenpassapp.greenpassbackend.model.CovidVaccinate
 import eu.greenpassapp.greenpassbackend.model.User
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
 import se.digg.dgc.payload.v1.DigitalCovidCertificate
 import se.digg.dgc.payload.v1.RecoveryEntry
@@ -21,52 +17,52 @@ import se.digg.dgc.payload.v1.VaccinationEntry
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+/**
+ * User Logic Impl
+ *
+ * The concrete implementation of UserLogic
+ *
+ */
 @Service
-@Transactional(rollbackFor = [Exception::class])
 class UserLogicImpl(
-    private val userRepository: UserRepository,
-    private val jwtHelper: JWTHelper,
     private val digitalGreenCertificate: DigitalGreenCertificate,
     private val passKit: PassKit
 ) : UserLogic {
-    override fun insert(certificate: String, validUntil: LocalDateTime): Pair<User, String> {
-        val user = getParsedUserFrom(certificate, validUntil)
-        val newUser = userRepository.saveAndFlush(user)
-        val token = jwtHelper.getToken(newUser.link!!)
-        return Pair(newUser, token)
-    }
-
-    override fun update(certificate: String, validUntil: LocalDateTime, token: String) {
-        val user = getParsedUserFrom(certificate, validUntil)
-        user.link = jwtHelper.verifyTokenAndGetLink(token)
-        userRepository.saveAndFlush(user)
-    }
-
-    override fun getUser(link: String): User{
-        return userRepository.findByLinkAndValidUtilAfter(link, LocalDateTime.now()) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No User found")
-    }
-
-    override fun delete(token: String) {
-        userRepository.delete(getUser(jwtHelper.verifyTokenAndGetLink(token)))
-    }
-
+    /**
+     * Creates a pkpass.
+     *
+     * @param certificate EU QR-Code certificate
+     * @param serialNumber for generating a pass, the same serialnumber is a useful hint for the apple wallet to replace the old pkpass
+     *
+     * @return Pkpass as a ByteArray.
+     */
     override fun generatePressKit(certificate: String, serialNumber: String): ByteArray {
         return passKit.generatePass(getParsedUserFrom(certificate), certificate, serialNumber)
     }
 
-    override fun deleteInvalidUsers() {
-        userRepository.deleteAllByValidUtilBefore(LocalDateTime.now())
-    }
-
-    private fun getParsedUserFrom(certificate: String, validUntil: LocalDateTime? = null): User {
+    /**
+     * Validates and creates certificate.
+     *
+     * @param certificate EU QR-Code certificate
+     *
+     * @return User Object generated from the certificate.
+     */
+    private fun getParsedUserFrom(certificate: String): User {
         val parsedCert = digitalGreenCertificate.validate(certificate)
-        val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob), validUntil)
+        val user = User(parsedCert.nam.gn, parsedCert.nam.fn, LocalDate.parse(parsedCert.dob))
         user.vaccinated = getVaccinatedFromUser(parsedCert)
         user.recovered = getRecoveredFromUser(parsedCert)
         user.tested = getTestedFromUser(parsedCert)
         return user
     }
 
+    /**
+     * Parses Vaccinating information from certificate.
+     *
+     * @param cert parsed certificate
+     *
+     * @return Optional CovidVaccinate.
+     */
     private fun getVaccinatedFromUser(cert : DigitalCovidCertificate): CovidVaccinate? {
         val firstVacEntry = cert.v?.firstOrNull() ?: return null
         var first: VaccinationEntry = firstVacEntry
@@ -81,6 +77,13 @@ class UserLogicImpl(
         return CovidVaccinate(last.dn, last.sd, last.dt, first.dt)
     }
 
+    /**
+     * Parses recovering information from certificate.
+     *
+     * @param cert parsed certificate
+     *
+     * @return Optional CovidRecover.
+     */
     private fun getRecoveredFromUser(cert: DigitalCovidCertificate): CovidRecover? {
         val firstRecoverEntry = cert.r?.firstOrNull() ?: return null
         var last: RecoveryEntry = firstRecoverEntry
@@ -94,6 +97,13 @@ class UserLogicImpl(
         return CovidRecover(last.du)
     }
 
+    /**
+     * Parses testing information from certificate.
+     *
+     * @param cert parsed certificate
+     *
+     * @return Optional CovidTest.
+     */
     private fun getTestedFromUser(cert: DigitalCovidCertificate): CovidTest? {
         val firstTestEntry = cert.t?.firstOrNull() ?: return null
         var last: TestEntry = firstTestEntry
