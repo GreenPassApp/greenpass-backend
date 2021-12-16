@@ -46,7 +46,7 @@ class PassKitImpl(
     override fun generatePass(user: User, certificate: String, serialNumber: String): ByteArray {
         val dateOfLastVaccinate = user.vaccinated?.dateOfLastVaccinate?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
         val validUntilRecovered = user.recovered?.validUntil?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZoneId.systemDefault())
+        val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZoneId.of("Europe/Vienna"))
 
         val listOfTextField = mutableListOf<TextField>()
         if(user.vaccinated != null) listOfTextField.add(TextField("certTypeVac", "$dateOfLastVaccinate (${user.vaccinated?.highestCurrDose}/${user.vaccinated?.dosesNeeded})", "vac"))
