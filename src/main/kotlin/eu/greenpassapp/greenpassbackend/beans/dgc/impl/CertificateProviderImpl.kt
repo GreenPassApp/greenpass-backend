@@ -36,7 +36,7 @@ import java.security.cert.X509Certificate
 @EnableScheduling
 class CertificateProviderImpl : CertificateProvider {
     private var certificates = mutableMapOf<String, String>()
-    private var publicKey: PublicKey
+    private lateinit var publicKey: PublicKey
 
     init {
         val inputStream = javaClass.getResourceAsStream("/certs/certs.pub")
